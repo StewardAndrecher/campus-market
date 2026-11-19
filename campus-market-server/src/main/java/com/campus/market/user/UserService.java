@@ -1,10 +1,9 @@
 package com.campus.market.user;
 
+import java.nio.charset.StandardCharsets;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.nio.charset.StandardCharsets;
 
 @Service
 public class UserService {
@@ -14,9 +13,9 @@ public class UserService {
 
     public UserService(
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder, com.campus.market.governance.ContentRules rules
-    ) {
-        this.rules=rules;
+            PasswordEncoder passwordEncoder,
+            com.campus.market.governance.ContentRules rules) {
+        this.rules = rules;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -25,15 +24,12 @@ public class UserService {
         if (request == null) {
             throw new InvalidUserException("注册信息不能为空");
         }
-        String username = request.username() == null
-                ? "" : request.username().strip();
+        String username = request.username() == null ? "" : request.username().strip();
         String nickname = NicknameValidator.normalize(request.nickname());
         String password = request.password(); // 密码不去除首尾空格。
 
         if (!username.matches("[a-z0-9_]{4,32}")) {
-            throw new InvalidUserException(
-                    "用户名需要4～32位小写英文字母、数字或下划线"
-            );
+            throw new InvalidUserException("用户名需要4～32位小写英文字母、数字或下划线");
         }
         if (password == null || password.isBlank()) {
             throw new InvalidUserException("密码不能为空或全是空白字符");

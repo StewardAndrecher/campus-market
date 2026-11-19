@@ -7,21 +7,35 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class NotificationOverviewService {
-    public record Overview(boolean deliveryEnabled, long pending, long unconfirmed,
-            long awaitingDelivery, long retrying, long leased, long delivered,
-            long oldestPendingSeconds, long maxPendingAttempts, String sampledAt) {}
+    public record Overview(
+            boolean deliveryEnabled,
+            long pending,
+            long unconfirmed,
+            long awaitingDelivery,
+            long retrying,
+            long leased,
+            long delivered,
+            long oldestPendingSeconds,
+            long maxPendingAttempts,
+            String sampledAt) {}
+
     private final JdbcTemplate jdbc;
     private final boolean enabled;
-    public NotificationOverviewService(JdbcTemplate jdbc,
-            @Value("${market.notifications.mq.enabled:false}") boolean enabled) {
+
+    public NotificationOverviewService(
+            JdbcTemplate jdbc, @Value("${market.notifications.mq.enabled:false}") boolean enabled) {
         this.jdbc = jdbc;
         this.enabled = enabled;
     }
-    @Transactional(readOnly=true, timeout=5)
+
+    @Transactional(readOnly = true, timeout = 5)
     public Overview overview() {
         // A single statement gives mutually consistent counts at the database sampling time.
-        return jdbc.query(connection -> {
-            var statement = connection.prepareStatement("""
+        return jdbc.query(
+                connection -> {
+                    var statement =
+                            connection.prepareStatement(
+                                    """
                 SELECT COALESCE(SUM(delivered_at IS NULL),0) AS pending,
                        COALESCE(SUM(delivered_at IS NULL AND published_at IS NULL),0) AS unconfirmed,
                        COALESCE(SUM(delivered_at IS NULL AND published_at IS NOT NULL),0) AS awaiting_delivery,
@@ -34,14 +48,22 @@ public class NotificationOverviewService {
                        CURRENT_TIMESTAMP(6) AS sampled_at
                 FROM notification_outbox
                 """);
-            statement.setQueryTimeout(5);
-            return statement;
-        }, rs -> {
-            if (!rs.next()) throw new IllegalStateException("通知概览采样失败");
-            return new Overview(enabled, rs.getLong("pending"), rs.getLong("unconfirmed"),
-                    rs.getLong("awaiting_delivery"), rs.getLong("retrying"), rs.getLong("leased"),
-                    rs.getLong("delivered"), rs.getLong("oldest_seconds"), rs.getLong("max_attempts"),
-                    rs.getTimestamp("sampled_at").toLocalDateTime().toString());
-        });
+                    statement.setQueryTimeout(5);
+                    return statement;
+                },
+                rs -> {
+                    if (!rs.next()) throw new IllegalStateException("通知概览采样失败");
+                    return new Overview(
+                            enabled,
+                            rs.getLong("pending"),
+                            rs.getLong("unconfirmed"),
+                            rs.getLong("awaiting_delivery"),
+                            rs.getLong("retrying"),
+                            rs.getLong("leased"),
+                            rs.getLong("delivered"),
+                            rs.getLong("oldest_seconds"),
+                            rs.getLong("max_attempts"),
+                            rs.getTimestamp("sampled_at").toLocalDateTime().toString());
+                });
     }
 }

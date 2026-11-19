@@ -5,11 +5,14 @@
 *.iml
 **/target/
 **/node_modules/
+**/playwright-report/
+**/test-results/
 **/unpackage/
 **/dist/
 **/data/
 **/.env
 **/.env.*
+!**/.env.example
 *.log
 *.zip
 *.sql.gz

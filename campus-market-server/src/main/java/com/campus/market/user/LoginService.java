@@ -1,10 +1,9 @@
 package com.campus.market.user;
 
 import com.campus.market.auth.LoginRateLimiter;
+import java.nio.charset.StandardCharsets;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.nio.charset.StandardCharsets;
 
 @Service
 public class LoginService {
@@ -16,8 +15,7 @@ public class LoginService {
     public LoginService(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
-            LoginRateLimiter limiter
-    ) {
+            LoginRateLimiter limiter) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.limiter = limiter;
@@ -29,8 +27,7 @@ public class LoginService {
         if (request == null) {
             throw new InvalidUserException("登录信息不能为空");
         }
-        String username = request.username() == null
-                ? "" : request.username().strip();
+        String username = request.username() == null ? "" : request.username().strip();
         String password = request.password();
 
         if (!username.matches("[a-z0-9_]{4,32}")) {
@@ -39,8 +36,8 @@ public class LoginService {
         if (password == null || password.isEmpty()) {
             throw new InvalidUserException("请填写密码");
         }
-        if (password.codePointCount(0, password.length()) > 64 ||
-                password.getBytes(StandardCharsets.UTF_8).length > 72) {
+        if (password.codePointCount(0, password.length()) > 64
+                || password.getBytes(StandardCharsets.UTF_8).length > 72) {
             throw new InvalidUserException("密码长度超过允许的上限");
         }
 

@@ -1,9 +1,9 @@
 package com.campus.market.favorite;
 
+import java.util.List;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/favorites")
@@ -19,21 +19,27 @@ public class FavoriteController {
     public ResponseEntity<FavoriteStateResponse> add(
             @PathVariable("productId") long id,
             @RequestHeader(name = "Authorization", required = false) String authorization) {
-        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.add(id, authorization));
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noStore())
+                .body(service.add(id, authorization));
     }
 
     @DeleteMapping(value = "/{productId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<FavoriteStateResponse> remove(
             @PathVariable("productId") long id,
             @RequestHeader(name = "Authorization", required = false) String authorization) {
-        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.remove(id, authorization));
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noStore())
+                .body(service.remove(id, authorization));
     }
 
     @GetMapping(value = "/ids", produces = "application/json;charset=UTF-8")
     public ResponseEntity<List<Long>> selectedIds(
             @RequestParam(name = "productIds", required = false) List<Long> ids,
             @RequestHeader(name = "Authorization", required = false) String authorization) {
-        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.selectedIds(ids, authorization));
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noStore())
+                .body(service.selectedIds(ids, authorization));
     }
 
     @GetMapping(produces = "application/json;charset=UTF-8")
@@ -43,6 +49,8 @@ public class FavoriteController {
             @RequestParam(name = "availability", defaultValue = "ALL") String availability,
             @RequestParam(name = "keyword", defaultValue = "") String keyword,
             @RequestHeader(name = "Authorization", required = false) String authorization) {
-        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.page(page, size, availability, keyword, authorization));
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noStore())
+                .body(service.page(page, size, availability, keyword, authorization));
     }
 }

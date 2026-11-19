@@ -1,33 +1,52 @@
 {
-  "asOf": "2026-10-25",
+  "asOf": "2026-11-19",
   "scope": "local verification; not a public production deployment",
   "backendFull": {
-    "tests": 1973,
-    "classes": 109,
-    "mode": "complete run plus affected NotificationIntegrationTest rerun",
-    "initialFixtureCleanupErrors": 9,
-    "affectedRerunTests": 35,
-    "passingClassesReused": 108,
-    "businessSourceChangedForRerun": false,
-    "explanation": "One private fixture cleanup call was added before deleting test orders. Complete-run reports and affected rerun were kept separately; this is not a fresh single all-green invocation."
-  },
-  "backendQuick": {
-    "tests": 148,
+    "tests": 1978,
+    "classes": 110,
     "failures": 0,
     "errors": 0,
     "skipped": 0,
-    "suites": 13
+    "durationSeconds": 963.72,
+    "mode": "single clean complete run against private MySQL, two Redis instances and RabbitMQ",
+    "sourceDigest": "77016c59132a1a7c7d73f610276dcc3510215940d469d60dc9b23a5b455afa78"
+  },
+  "backendQuick": {
+    "tests": 151,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "suites": 14,
+    "durationSeconds": 12.32
   },
   "backendToolTests": 77,
+  "clientToolTests": 14,
   "clientDesktop": {
     "tests": 1105,
     "testFiles": 54,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
     "type": "Node logic tests; not end-to-end or native-device coverage"
+  },
+  "browserE2E": {
+    "tests": 3,
+    "passed": 3,
+    "runner": "Node 22 built-in WebSocket plus Chromium CDP without npm dependencies",
+    "browser": "Chromium 157",
+    "coverage": ["home catalogue", "register and login", "publish product through real backend", "390px viewport without horizontal overflow"],
+    "nativeDeviceCoverage": false
+  },
+  "formatting": {
+    "spotlessJavaFiles": 371,
+    "passed": true
   },
   "migrations": {
     "files": 42,
     "latestVersion": 136,
-    "tablesIncludingHistory": 45
+    "tablesIncludingHistory": 45,
+    "duplicateCursorIndexMigrationRemoved": true,
+    "cursorIndexReusedFrom": "V69"
   },
   "databaseDrill": {
     "checks": 21,
@@ -62,10 +81,11 @@
   },
   "privacy": "Only counts and verification scope are public. Private reports, database backups, credentials, real rows and filesystem paths are excluded.",
   "publicationChecks": {
-    "backendQuickTests": 148,
+    "backendQuickTests": 151,
     "backendPythonToolTests": 77,
     "clientPythonToolTests": 14,
     "clientDesktopTests": 1105,
+    "browserE2ETests": 3,
     "allPassed": true,
     "freshLocalPublicSourceRun": true
   }

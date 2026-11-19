@@ -17,9 +17,9 @@ Java 后端 × uni-app 多端前端 × Electron 桌面端的校园二手交易�
 
 [项目展示](#项目展示) · [技术实现](#我在项目里重点练习了什么) · [本地运行](docs/GETTING_STARTED.md) · [验收记录](docs/VERIFICATION.md) · [源码导航](docs/TECH_STACK.md)
 
-[![Backend checks](https://github.com/StewardAndrecher/-/actions/workflows/backend-quick.yml/badge.svg)](https://github.com/StewardAndrecher/-/actions/workflows/backend-quick.yml)
-[![Client checks](https://github.com/StewardAndrecher/-/actions/workflows/client-desktop-quick.yml/badge.svg)](https://github.com/StewardAndrecher/-/actions/workflows/client-desktop-quick.yml)
-[![Full checks](https://github.com/StewardAndrecher/-/actions/workflows/release-quality.yml/badge.svg)](https://github.com/StewardAndrecher/-/actions/workflows/release-quality.yml)
+[![Backend checks](https://github.com/StewardAndrecher/campus-market/actions/workflows/backend-quick.yml/badge.svg)](https://github.com/StewardAndrecher/campus-market/actions/workflows/backend-quick.yml)
+[![Client checks](https://github.com/StewardAndrecher/campus-market/actions/workflows/client-desktop-quick.yml/badge.svg)](https://github.com/StewardAndrecher/campus-market/actions/workflows/client-desktop-quick.yml)
+[![Full checks](https://github.com/StewardAndrecher/campus-market/actions/workflows/release-quality.yml/badge.svg)](https://github.com/StewardAndrecher/campus-market/actions/workflows/release-quality.yml)
 
 </div>
 
@@ -30,6 +30,15 @@ Java 后端 × uni-app 多端前端 × Electron 桌面端的校园二手交易�
 我从商品展示和发布开始，逐步补上账号、收藏、买卖沟通、订单、退款售后和管理功能。后来遇到重复提交、订单超时、消息重试、缓存一致性等问题，又加入了 Redis、RabbitMQ、事务和自动化测试。这个仓库保留了前后端源码、数据库迁移和运行工具，可以沿着一笔交易去看每一层是怎样配合的。
 
 目前定位是**可在本地运行和演示的全栈学习项目**。订单使用模拟付款；真实微信支付、生产服务器和公网域名尚未接入。下面展示的是已经实现的页面和业务流程。
+
+## 30 秒了解技术重点
+
+- **订单一致性**：统一加锁顺序、商品版本校验、UUID 请求幂等、状态流转与追加式事件记录。
+- **可靠消息**：事务型 Outbox、发布确认、租约与重试、消费校验，以及数据库扫描补偿。
+- **缓存与查询**：Redis 版本缓存、提交后失效、TTL 抖动与故障降级；订单复合游标分页和 `EXPLAIN ANALYZE` 索引验证。
+- **工程验证**：Java / Node 自动化测试、GitHub Actions、真实 H5 浏览器 E2E，以及明确区分的验收边界。
+
+[3 分钟演示路线](docs/DEMO_AND_DEPLOYMENT.md) · [一键启动本地依赖](docs/GETTING_STARTED.md#推荐用-docker-启动本地依赖) · [浏览器 E2E](campus-market-client/e2e/README.md)
 
 ## 项目展示
 
@@ -117,7 +126,7 @@ Java 后端 × uni-app 多端前端 × Electron 桌面端的校园二手交易�
 | 缓存与保护 | **Redis、Lua**：商品详情版本缓存；独立实例处理登录与注册频率限制 |
 | 消息 | **RabbitMQ、Spring AMQP**：订单超时、站内通知、Outbox、发布确认、重试与幂等消费 |
 | 桌面端 | **Electron**：复用 Web 构建，本地静态服务、窗口隔离与请求白名单 |
-| 工程与观测 | **JUnit、Node Test Runner、Python 工具、GitHub Actions、OpenAPI、Prometheus / Grafana / Alertmanager** |
+| 工程与观测 | **JUnit、Node Test Runner、Chromium CDP、Python 工具、GitHub Actions、OpenAPI、Prometheus / Grafana / Alertmanager** |
 
 ## 我在项目里重点练习了什么
 
@@ -126,7 +135,7 @@ Java 后端 × uni-app 多端前端 × Electron 桌面端的校园二手交易�
 - **理解缓存与数据库的职责。** 商品详情按版本缓存，事务提交后再失效；数据库决定商品是否可见。登录保护与可淘汰缓存分实例，避免限流记录被缓存淘汰策略影响。[缓存实现](campus-market-server/src/main/java/com/campus/market/product/ProductDetailCache.java) · [登录保护](campus-market-server/src/main/java/com/campus/market/auth/LoginRateLimiter.java)
 - **把权限与用户身份放在服务端检查。** 使用随机会话令牌，校验商品归属、订单双方和管理员角色；页面隐藏按钮之外，接口仍检查越权、版本冲突和重复请求。[账号与会话](campus-market-server/src/main/java/com/campus/market/auth)
 - **把数据恢复也作为功能来验证。** 数据库与图片一起备份，使用摘要核验并恢复到全新隔离库；运行、迁移、备份和维护账号分别授权。资金数据保留证据和借贷分录，模拟与真实账簿分开。[数据库设计与演练](campus-market-server/docs/database-maturity.md)
-- **先看执行计划再加索引。** 在 10 万商品、10 万订单的合成数据上比较执行计划，为买家/卖家状态分页补复合索引。关键词包含查询仍有扫描成本，后续需要继续优化。[本地 SQL 测量记录](docs/VERIFICATION.md#数据库演练与查询测量)
+- **先看执行计划再加索引。** 在 10 万商品、10 万订单的合成数据上比较执行计划，为买家/卖家状态分页补复合索引；新增订单 `created_at + id` 复合游标，避免深 OFFSET。关键词包含查询仍有扫描成本，后续需要继续优化。[本地 SQL 测量记录](docs/VERIFICATION.md#数据库演练与查询测量) · [订单游标分页](campus-market-server/ORDER-CURSOR-PAGINATION.md)
 
 ## 项目结构
 
@@ -143,16 +152,19 @@ docs/                  运行说明、技术导航、验收摘要和真实截图
 
 ## 本地运行
 
-1. 克隆仓库，准备 Java 17、Maven、MySQL、Redis 和 HBuilderX。
-2. 建立空的开发数据库，配置本机凭据并通过 Flyway 初始化；启动两个独立 Redis 实例和后端。
-3. 在 HBuilderX 导入 `campus-market-client`，运行到浏览器；小程序需填写自己的 AppID。
-4. 可选启动 RabbitMQ、邮件服务与 Electron，查看相应场景。
+准备 Docker、JDK 17、Python 和 HBuilderX：
 
-**完整步骤、配置变量与验证命令：[GETTING_STARTED.md](docs/GETTING_STARTED.md)。** 仓库不提供真实账号、私有数据库和支付密钥。
+```sh
+python3 scripts/dev.py start
+cd campus-market-client
+sh tools/build.sh h5
+```
+
+`start` 首次会创建本地 `.env`，启动并健康检查 MySQL、两个 Redis 和 RabbitMQ，然后运行后端。前端在 HBuilderX 导入 `campus-market-client` 运行，或使用上方构建命令生成 H5。手工安装、端口修改和完整验证命令见 **[GETTING_STARTED.md](docs/GETTING_STARTED.md)**；真实凭据和私有数据库不提交仓库。
 
 ## 验证与当前边界
 
-本地验证记录更新于 **2026-10-25**。后端完整测试覆盖 109 类、1973 项；最近一次记录由完整执行与受影响的 35 项通知测试重跑合并确认，详细过程没有省略。前端与桌面逻辑检查共 1105 项，另外保留后端快速检查、工具测试、跨端编译和数据库恢复演练记录。**具体范围和限制见 [验收记录](docs/VERIFICATION.md)**；上方 CI 徽章展示 GitHub 上实际运行的状态。
+本地验证记录更新于 **2026-11-19**。后端完整回归 110 类、1978 项一次全绿；快速层 14 类、151 项，前端与桌面逻辑 54 个文件、1105 项，真实 H5 浏览器验收 3 项全部通过。另保留工具测试、跨端编译和数据库恢复演练记录。**具体范围和限制见 [验收记录](docs/VERIFICATION.md)**；上方 CI 徽章展示 GitHub 上实际运行的状态。
 
 | 项目 | 当前范围 |
 | --- | --- |

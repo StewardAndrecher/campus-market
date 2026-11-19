@@ -7,11 +7,24 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AdminOrderOverviewService {
-    public record Overview(long total, long pendingPayment, long paid, long delivered,
-            long completed, long cancelled, long closedTimeout, long completedAmountInCents,
-            long overduePendingPayment, long oldestPendingPaymentSeconds, String sampledAt) {}
+    public record Overview(
+            long total,
+            long pendingPayment,
+            long paid,
+            long delivered,
+            long completed,
+            long cancelled,
+            long closedTimeout,
+            long completedAmountInCents,
+            long overduePendingPayment,
+            long oldestPendingPaymentSeconds,
+            String sampledAt) {}
+
     private final JdbcTemplate jdbc;
-    public AdminOrderOverviewService(JdbcTemplate jdbc) { this.jdbc = jdbc; }
+
+    public AdminOrderOverviewService(JdbcTemplate jdbc) {
+        this.jdbc = jdbc;
+    }
 
     static long safeInteger(BigDecimal value) {
         long result = value.longValueExact();
@@ -21,11 +34,14 @@ public class AdminOrderOverviewService {
         return result;
     }
 
-    @Transactional(readOnly=true, timeout=5)
+    @Transactional(readOnly = true, timeout = 5)
     public Overview overview() {
         // One database statement samples counts, amounts and age consistently.
-        return jdbc.query(connection -> {
-            var statement = connection.prepareStatement("""
+        return jdbc.query(
+                connection -> {
+                    var statement =
+                            connection.prepareStatement(
+                                    """
                 SELECT COUNT(*) AS total,
                        COALESCE(SUM(status='PENDING_PAYMENT'),0) AS pending_payment,
                        COALESCE(SUM(status='PAID'),0) AS paid,
@@ -40,17 +56,23 @@ public class AdminOrderOverviewService {
                        CURRENT_TIMESTAMP(6) AS sampled_at
                 FROM market_orders
                 """);
-            statement.setQueryTimeout(5);
-            return statement;
-        }, rs -> {
-            if (!rs.next()) throw new IllegalStateException("交易概览采样失败");
-            return new Overview(safeInteger(rs.getBigDecimal("total")),
-                    safeInteger(rs.getBigDecimal("pending_payment")), safeInteger(rs.getBigDecimal("paid")),
-                    safeInteger(rs.getBigDecimal("delivered")), safeInteger(rs.getBigDecimal("completed")),
-                    safeInteger(rs.getBigDecimal("cancelled")), safeInteger(rs.getBigDecimal("closed_timeout")),
-                    safeInteger(rs.getBigDecimal("completed_amount")), safeInteger(rs.getBigDecimal("overdue_pending")),
-                    safeInteger(rs.getBigDecimal("oldest_pending_seconds")),
-                    rs.getTimestamp("sampled_at").toLocalDateTime().toString());
-        });
+                    statement.setQueryTimeout(5);
+                    return statement;
+                },
+                rs -> {
+                    if (!rs.next()) throw new IllegalStateException("交易概览采样失败");
+                    return new Overview(
+                            safeInteger(rs.getBigDecimal("total")),
+                            safeInteger(rs.getBigDecimal("pending_payment")),
+                            safeInteger(rs.getBigDecimal("paid")),
+                            safeInteger(rs.getBigDecimal("delivered")),
+                            safeInteger(rs.getBigDecimal("completed")),
+                            safeInteger(rs.getBigDecimal("cancelled")),
+                            safeInteger(rs.getBigDecimal("closed_timeout")),
+                            safeInteger(rs.getBigDecimal("completed_amount")),
+                            safeInteger(rs.getBigDecimal("overdue_pending")),
+                            safeInteger(rs.getBigDecimal("oldest_pending_seconds")),
+                            rs.getTimestamp("sampled_at").toLocalDateTime().toString());
+                });
     }
 }

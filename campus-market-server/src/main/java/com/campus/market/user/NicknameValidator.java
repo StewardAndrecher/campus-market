@@ -2,6 +2,7 @@ package com.campus.market.user;
 
 public final class NicknameValidator {
     private NicknameValidator() {}
+
     public static String normalize(String raw) {
         String nickname = raw == null ? "" : raw.strip();
         int length = nickname.codePointCount(0, nickname.length());

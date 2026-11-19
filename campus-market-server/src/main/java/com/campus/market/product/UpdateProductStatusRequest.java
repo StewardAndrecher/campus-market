@@ -4,6 +4,4 @@ import tools.jackson.databind.annotation.JsonDeserialize;
 
 public record UpdateProductStatusRequest(
         ProductStatus status,
-        @JsonDeserialize(using = ProductVersionDeserializer.class) Long version
-) {
-}
+        @JsonDeserialize(using = ProductVersionDeserializer.class) Long version) {}

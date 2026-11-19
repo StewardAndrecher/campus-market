@@ -1,0 +1,13 @@
+{
+  "name": "campus-market-browser-e2e",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Dependency-free Chromium acceptance tests for the verified H5 build",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node cdp_smoke.mjs"
+  }
+}

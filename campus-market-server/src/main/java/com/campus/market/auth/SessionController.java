@@ -12,10 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(originPatterns = {
-        "http://localhost:[*]",
-        "http://127.0.0.1:[*]"
-})
+@CrossOrigin(originPatterns = {"http://localhost:[*]", "http://127.0.0.1:[*]"})
 public class SessionController {
     private final SessionService sessionService;
 
@@ -25,16 +22,15 @@ public class SessionController {
 
     @GetMapping(value = "/me", produces = "application/json;charset=UTF-8")
     public ResponseEntity<UserResponse> me(
-            @RequestHeader(value = "Authorization", required = false) String authorization
-    ) {
-        return ResponseEntity.ok().cacheControl(CacheControl.noStore())
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noStore())
                 .body(sessionService.currentUser(authorization));
     }
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(
-            @RequestHeader(value = "Authorization", required = false) String authorization
-    ) {
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
         sessionService.logout(authorization);
         return ResponseEntity.noContent().cacheControl(CacheControl.noStore()).build();
     }

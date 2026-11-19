@@ -2,6 +2,28 @@
 
 从仓库根目录开始。下面使用空的本地开发库，不会导入作者的账号或商品。完整回归还需要 RabbitMQ；先看页面可以暂不启用 MQ。
 
+## 推荐：用 Docker 启动本地依赖
+
+安装 Docker Desktop / Docker Engine、JDK 17 和 Python 3.9+ 后，在仓库根目录运行：
+
+```sh
+# 首次自动从 .env.example 创建仅供本地演示的 .env
+python3 scripts/dev.py deps
+
+# 确认使用 JDK 17，再启动后端；数据库迁移只针对本地空库
+python3 scripts/dev.py backend
+```
+
+也可以把两步合并为 `python3 scripts/dev.py start`。`deps` 会等待 MySQL、两个 Redis 和 RabbitMQ 通过健康检查；`.env` 不会提交 Git。修改 `.env` 后，显式设置的真实终端环境变量优先于文件中的值。
+
+```sh
+python3 scripts/dev.py status   # 查看容器状态
+python3 scripts/dev.py stop     # 停止依赖，保留数据
+python3 scripts/dev.py down     # 移除容器和网络，保留命名卷
+```
+
+容器中的 MySQL 使用 `campus_market` 空库和 `.env` 中的开发账号；默认演示密码只能用于本机。前端仍需按下文使用 HBuilderX 构建。若端口已被占用，先修改 `.env` 中对应端口，并同步 `DB_URL`、`REDIS_*`、`LOGIN_REDIS_*`、`RABBITMQ_*`。下面保留手工安装方式，便于理解各组件和进行隔离测试。
+
 ## 1. 准备环境
 
 | 工具 | 要求 |
@@ -16,7 +38,7 @@
 | RabbitMQ + Erlang | 启用消息功能或执行完整后端回归时需要 |
 
 ```sh
-git clone https://github.com/StewardAndrecher/-.git campus-market
+git clone https://github.com/StewardAndrecher/campus-market.git campus-market
 cd campus-market
 ```
 

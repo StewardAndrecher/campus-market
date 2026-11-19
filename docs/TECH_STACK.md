@@ -57,6 +57,7 @@ App 节点表示已编译的资源代码，尚未完成原生安装包和真机�
 ## 数据库与运维
 
 - [Flyway 迁移](../campus-market-server/src/main/resources/db/migration/)：42 份版本迁移，最新 V136；私有演练生成 45 张表（含迁移历史）。
+- [订单游标分页](../campus-market-server/ORDER-CURSOR-PAGINATION.md)：保留旧页码接口，新增 `created_at + id` 复合游标，复用 V69 已有索引。
 - [数据库成熟度文档](../campus-market-server/docs/database-maturity.md)：支付尝试/退款执行证据/借贷分录/对账/结算模型、权限分离、备份恢复和保留策略。
 - [数据库运维工具](../campus-market-server/scripts/)：`database_accounts.py`、`database_backup.py`、`database_retention.py`、`database_reconcile.py`、`database_benchmark.py`。
 - [production 配置](../campus-market-server/src/main/resources/application-production.properties)：私有监听、关闭模拟支付、独立迁移、UTC 连接与环境保护。
@@ -66,6 +67,6 @@ App 节点表示已编译的资源代码，尚未完成原生安装包和真机�
 
 Electron 主进程与本地静态服务位于 [desktop/src](../campus-market-desktop/src/)。渲染页没有 Node 权限，启用隔离与沙箱，对导航和网络目标做限制；Mac 包不包含后端和数据库。
 
-根目录 [.github/workflows](../.github/workflows/) 包含三类 CI。GitHub 上的完整检查运行隔离后端回归和服务端打包；HBuilderX 多端编译需要配置了编译器的本地发布主机，不能把云端 Java 测试当成手机真机验收。
+根目录 [.github/workflows](../.github/workflows/) 包含三类 CI。GitHub 上的完整检查运行隔离后端回归和服务端打包；HBuilderX 多端编译与 [Chromium CDP 浏览器 E2E](../campus-market-client/e2e/README.md) 需要配置了编译器的本地发布主机，不能把云端 Java 测试当成手机真机或浏览器端到端验收。
 
 更多记录：[本地运行](GETTING_STARTED.md) · [验证范围](VERIFICATION.md) · [截图索引](SHOWCASE.md)

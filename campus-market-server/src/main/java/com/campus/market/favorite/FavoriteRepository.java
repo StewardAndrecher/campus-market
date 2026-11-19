@@ -1,11 +1,11 @@
 package com.campus.market.favorite;
 
 import com.campus.market.product.ProductRepository;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 @Repository
 public class FavoriteRepository {
@@ -18,15 +18,20 @@ public class FavoriteRepository {
     }
 
     public void add(long userId, long productId) {
-        jdbc.update("""
+        jdbc.update(
+                """
                 INSERT INTO product_favorites(user_id, product_id) VALUES (?, ?)
                 ON DUPLICATE KEY UPDATE product_id = product_id
-                """, userId, productId);
+                """,
+                userId,
+                productId);
     }
 
     public void remove(long userId, long productId) {
-        jdbc.update("DELETE FROM product_favorites WHERE user_id = ? AND product_id = ?",
-                userId, productId);
+        jdbc.update(
+                "DELETE FROM product_favorites WHERE user_id = ? AND product_id = ?",
+                userId,
+                productId);
     }
 
     public List<Long> findSelectedIds(long userId, List<Long> ids) {
@@ -35,8 +40,13 @@ public class FavoriteRepository {
         List<Object> args = new ArrayList<>();
         args.add(userId);
         args.addAll(ids);
-        return jdbc.queryForList("SELECT product_id FROM product_favorites WHERE user_id = ? "
-                + "AND product_id IN (" + placeholders + ") ORDER BY product_id", Long.class, args.toArray());
+        return jdbc.queryForList(
+                "SELECT product_id FROM product_favorites WHERE user_id = ? "
+                        + "AND product_id IN ("
+                        + placeholders
+                        + ") ORDER BY product_id",
+                Long.class,
+                args.toArray());
     }
 
     public long count(long userId) {
@@ -64,16 +74,21 @@ public class FavoriteRepository {
     private static List<Object> queryArgs(long userId, String keyword) {
         List<Object> args = new ArrayList<>();
         args.add(userId);
-        if (!keyword.isEmpty()) args.add("%" + keyword.replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%");
+        if (!keyword.isEmpty())
+            args.add("%" + keyword.replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%");
         return args;
     }
 
     public long count(long userId, String availability, String keyword) {
-        Long result = jdbc.queryForObject(
-                "SELECT COUNT(*) FROM product_favorites f "
-                + "LEFT JOIN products p ON p.id = f.product_id AND p.status = 'ON_SALE' "
-                + "WHERE f.user_id = ?" + availabilityClause(availability) + keywordClause(keyword),
-                Long.class, queryArgs(userId, keyword).toArray());
+        Long result =
+                jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM product_favorites f "
+                                + "LEFT JOIN products p ON p.id = f.product_id AND p.status = 'ON_SALE' "
+                                + "WHERE f.user_id = ?"
+                                + availabilityClause(availability)
+                                + keywordClause(keyword),
+                        Long.class,
+                        queryArgs(userId, keyword).toArray());
         return result == null ? 0 : result;
     }
 
@@ -81,14 +96,18 @@ public class FavoriteRepository {
         return findPage(userId, size, offset, "ALL");
     }
 
-    public List<FavoriteItemResponse> findPage(long userId, int size, long offset, String availability) {
+    public List<FavoriteItemResponse> findPage(
+            long userId, int size, long offset, String availability) {
         return findPage(userId, size, offset, availability, "");
     }
 
-    public List<FavoriteItemResponse> findPage(long userId, int size, long offset, String availability, String keyword) {
+    public List<FavoriteItemResponse> findPage(
+            long userId, int size, long offset, String availability, String keyword) {
         List<Object> args = queryArgs(userId, keyword);
-        args.add(size); args.add(offset);
-        String select = """
+        args.add(size);
+        args.add(offset);
+        String select =
+                """
                 SELECT f.product_id,
                        p.id, p.title, p.description, p.price_in_cents,
                        p.status, p.cover_image_id, p.version, p.category_code, p.campus_code, p.condition_code, p.handover_location,
@@ -100,12 +119,21 @@ public class FavoriteRepository {
                 LEFT JOIN users u ON u.id = p.seller_id
                 WHERE f.user_id = ?
                 """;
-        return jdbc.query(select + availabilityClause(availability) + keywordClause(keyword) + """
+        return jdbc.query(
+                select
+                        + availabilityClause(availability)
+                        + keywordClause(keyword)
+                        + """
 
                 ORDER BY f.created_at DESC, f.product_id DESC
                 LIMIT ? OFFSET ?
-                """, (rs, rowNum) -> new FavoriteItemResponse(
-                rs.getLong("product_id"), rs.getObject("id", Long.class) == null
-                ? null : products.mapProduct(rs, rowNum)), args.toArray());
+                """,
+                (rs, rowNum) ->
+                        new FavoriteItemResponse(
+                                rs.getLong("product_id"),
+                                rs.getObject("id", Long.class) == null
+                                        ? null
+                                        : products.mapProduct(rs, rowNum)),
+                args.toArray());
     }
 }

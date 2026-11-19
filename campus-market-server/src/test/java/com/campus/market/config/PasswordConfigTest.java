@@ -1,10 +1,10 @@
 package com.campus.market.config;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class PasswordConfigTest {
 
@@ -32,10 +32,7 @@ class PasswordConfigTest {
             PasswordEncoder encoder = context.getBean(PasswordEncoder.class);
 
             // 25个这个汉字占75个UTF-8字节，超过BCrypt的限制。
-            assertThrows(
-                    IllegalArgumentException.class,
-                    () -> encoder.encode("密".repeat(25))
-            );
+            assertThrows(IllegalArgumentException.class, () -> encoder.encode("密".repeat(25)));
         }
     }
 }

@@ -7,13 +7,20 @@ public enum ProductOwnerSort {
     PRICE_DESC(ProductSort.PRICE_DESC);
 
     private final ProductSort sort;
-    ProductOwnerSort(ProductSort sort) { this.sort = sort; }
-    public String orderBy() { return sort.orderBy(); }
+
+    ProductOwnerSort(ProductSort sort) {
+        this.sort = sort;
+    }
+
+    public String orderBy() {
+        return sort.orderBy();
+    }
 
     public static ProductOwnerSort parse(String code) {
         if (code == null || code.isEmpty()) return NEWEST;
-        try { return valueOf(code); }
-        catch (IllegalArgumentException error) {
+        try {
+            return valueOf(code);
+        } catch (IllegalArgumentException error) {
             throw new InvalidProductException("我的发布排序方式无效，请从排序列表中选择");
         }
     }

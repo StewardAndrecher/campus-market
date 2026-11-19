@@ -7,11 +7,11 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 @Configuration
 @EnableScheduling
-@ConditionalOnProperty(name="market.monitoring.enabled",havingValue="true")
+@ConditionalOnProperty(name = "market.monitoring.enabled", havingValue = "true")
 public class NotificationMonitorConfiguration {
-    @Bean(name="notificationMonitorTaskScheduler")
+    @Bean(name = "notificationMonitorTaskScheduler")
     public ThreadPoolTaskScheduler notificationMonitorTaskScheduler() {
-        var scheduler=new ThreadPoolTaskScheduler();
+        var scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(2);
         scheduler.setThreadNamePrefix("notification-monitor-");
         return scheduler;

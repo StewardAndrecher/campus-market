@@ -1,14 +1,13 @@
 package com.campus.market.auth;
 
 import com.campus.market.user.UserResponse;
-import org.springframework.stereotype.Service;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.HexFormat;
+import org.springframework.stereotype.Service;
 
 @Service
 public class SessionService {
@@ -19,22 +18,21 @@ public class SessionService {
         this.sessionRepository = sessionRepository;
     }
 
-    @org.springframework.transaction.annotation.Transactional(isolation=org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
+    @org.springframework.transaction.annotation.Transactional(
+            isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
     public LoginResponse issueToken(UserResponse user) {
         sessionRepository.lockUser(user.id());
         byte[] bytes = new byte[32];
         secureRandom.nextBytes(bytes);
-        String token = Base64.getUrlEncoder().withoutPadding()
-                .encodeToString(bytes);
+        String token = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
         sessionRepository.insert(hashToken(token), user.id());
-        return new LoginResponse(
-                token, "Bearer", SessionRepository.TOKEN_TTL_SECONDS, user
-        );
+        return new LoginResponse(token, "Bearer", SessionRepository.TOKEN_TTL_SECONDS, user);
     }
 
     public UserResponse currentUser(String authorization) {
         String token = extractToken(authorization);
-        return sessionRepository.findCurrentUser(hashToken(token))
+        return sessionRepository
+                .findCurrentUser(hashToken(token))
                 .orElseThrow(LoginRequiredException::new);
     }
 
@@ -61,8 +59,9 @@ public class SessionService {
 
     private String hashToken(String token) {
         try {
-            byte[] digest = MessageDigest.getInstance("SHA-256")
-                    .digest(token.getBytes(StandardCharsets.UTF_8));
+            byte[] digest =
+                    MessageDigest.getInstance("SHA-256")
+                            .digest(token.getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().formatHex(digest);
         } catch (NoSuchAlgorithmException exception) {
             throw new IllegalStateException("运行环境不支持SHA-256", exception);

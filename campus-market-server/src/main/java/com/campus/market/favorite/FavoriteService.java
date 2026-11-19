@@ -5,10 +5,10 @@ import com.campus.market.product.InvalidProductException;
 import com.campus.market.product.ProductNotFoundException;
 import com.campus.market.product.ProductRepository;
 import com.campus.market.product.ProductStatus;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
 
 @Service
 public class FavoriteService {
@@ -16,7 +16,8 @@ public class FavoriteService {
     private final ProductRepository products;
     private final SessionService sessions;
 
-    public FavoriteService(FavoriteRepository favorites, ProductRepository products, SessionService sessions) {
+    public FavoriteService(
+            FavoriteRepository favorites, ProductRepository products, SessionService sessions) {
         this.favorites = favorites;
         this.products = products;
         this.sessions = sessions;
@@ -26,8 +27,9 @@ public class FavoriteService {
     public FavoriteStateResponse add(long productId, String authorization) {
         long userId = sessions.currentUser(authorization).id();
         validateId(productId);
-        var product = products.findByIdForUpdate(productId)
-                .orElseThrow(() -> new ProductNotFoundException("商品不存在或已下架"));
+        var product =
+                products.findByIdForUpdate(productId)
+                        .orElseThrow(() -> new ProductNotFoundException("商品不存在或已下架"));
         if (product.status() != ProductStatus.ON_SALE) {
             throw new ProductNotFoundException("商品不存在或已下架");
         }
@@ -59,17 +61,20 @@ public class FavoriteService {
     }
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
-    public FavoritePageResponse page(int page, int size, String availability, String authorization) {
+    public FavoritePageResponse page(
+            int page, int size, String availability, String authorization) {
         return page(page, size, availability, "", authorization);
     }
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
-    public FavoritePageResponse page(int page, int size, String availability, String keyword, String authorization) {
+    public FavoritePageResponse page(
+            int page, int size, String availability, String keyword, String authorization) {
         long userId = sessions.currentUser(authorization).id();
         if (page < 1 || size < 1 || size > 50) {
             throw new InvalidProductException("页码须大于等于1，每页数量须在1～50之间");
         }
-        if (availability == null || !List.of("ALL", "AVAILABLE", "UNAVAILABLE").contains(availability)) {
+        if (availability == null
+                || !List.of("ALL", "AVAILABLE", "UNAVAILABLE").contains(availability)) {
             throw new InvalidProductException("收藏可用性须为ALL、AVAILABLE或UNAVAILABLE");
         }
         String searchText = keyword == null ? "" : keyword.strip();
@@ -77,8 +82,12 @@ public class FavoriteService {
             throw new InvalidProductException("收藏搜索关键词不能超过50个字符或包含控制字符");
         }
         long total = favorites.count(userId, availability, searchText);
-        return new FavoritePageResponse(favorites.findPage(userId, size, ((long) page - 1) * size, availability, searchText),
-                total, page, size);
+        return new FavoritePageResponse(
+                favorites.findPage(
+                        userId, size, ((long) page - 1) * size, availability, searchText),
+                total,
+                page,
+                size);
     }
 
     private void validateId(Long id) {

@@ -6,11 +6,12 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/categories")
-@CrossOrigin(originPatterns={"http://localhost:[*]", "http://127.0.0.1:[*]"})
+@CrossOrigin(originPatterns = {"http://localhost:[*]", "http://127.0.0.1:[*]"})
 public class CategoryController {
-    @GetMapping(produces="application/json;charset=UTF-8")
+    @GetMapping(produces = "application/json;charset=UTF-8")
     public ResponseEntity<List<CategoryResponse>> list() {
-        return ResponseEntity.ok().header("Cache-Control", "no-store")
+        return ResponseEntity.ok()
+                .header("Cache-Control", "no-store")
                 .body(ProductCategory.catalog());
     }
 }
